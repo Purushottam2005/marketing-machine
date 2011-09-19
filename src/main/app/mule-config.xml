@@ -6,12 +6,14 @@
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
       xmlns:rss="http://www.mulesoft.org/schema/mule/rss"
       xmlns:twitter="http://www.mulesoft.org/schema/mule/twitter"
+      xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
         http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/3.1/mule-twitter.xsd
         http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/3.1/mule-http.xsd
         http://www.mulesoft.org/schema/mule/rss http://www.mulesoft.org/schema/mule/rss/3.1/mule-rss.xsd
+        http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/3.1/mule-quartz.xsd
         http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/3.1/mule-vm.xsd">
 
     <twitter:config name="twitter" consumerKey="${twitter.consumer.key}" consumerSecret="${twitter.consumer.secret}"
@@ -42,10 +44,15 @@
 <!--         </choice> -->
 <!--     </flow> -->
 
+    <http:endpoint name="muleBlogs" address="http://feeds.feedburner.com/muleblog" method="GET"
+        exchange-pattern="request-response"/>
+
     <flow name="rss2twitter">
-        <poll frequency="10000">
-            <http:outbound-endpoint address="http://feeds.feedburner.com/muleblog" method="GET"/>
-        </poll>
+        <quartz:inbound-endpoint jobName="pollMuleBlogs" repeatInterval="10000">
+            <quartz:endpoint-polling-job>
+                <quartz:job-endpoint ref="muleBlogs"/>
+            </quartz:endpoint-polling-job>
+        </quartz:inbound-endpoint>
 
         <!-- split the feed into individual messages -->
         <rss:feed-splitter/>
@@ -69,6 +76,7 @@
                 directory="${java.io.tmpdir}/mule-marketing-machine" />
         </idempotent-message-filter>
 
+<!--         <logger level="INFO" message="Yet another great MuleSoft blog post: #[groovy:payload.uri]"/> -->
         <twitter:update-status status="Yet another great MuleSoft blog post: #[groovy:payload.uri]"/>
     </flow>
 </mule>

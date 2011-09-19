@@ -47,6 +47,11 @@
             <artifactId>mule-transport-vm</artifactId>
             <version>${mule.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-quartz</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>
