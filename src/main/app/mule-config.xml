@@ -48,7 +48,7 @@
         exchange-pattern="request-response"/>
 
     <flow name="rss2twitter">
-        <quartz:inbound-endpoint jobName="pollMuleBlogs" repeatInterval="10000">
+        <quartz:inbound-endpoint jobName="pollMuleBlogs" cronExpression="/10 * * * * ?">
             <quartz:endpoint-polling-job>
                 <quartz:job-endpoint ref="muleBlogs"/>
             </quartz:endpoint-polling-job>
