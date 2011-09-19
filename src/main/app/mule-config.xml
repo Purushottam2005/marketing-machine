@@ -19,33 +19,43 @@
     <twitter:config name="twitter" consumerKey="${twitter.consumer.key}" consumerSecret="${twitter.consumer.secret}"
         format="JSON" oauthToken="${twitter.access.token}" oauthTokenSecret="${twitter.access.secret}"/>
 
+    <!--
+        Explicitly define a HTTP connector here so that it doesn't conflict with the one that's
+        automatically created under the hood by the Twitter iBean.
+     -->
+    <http:connector name="HttpConnector"/>
+
 <!--     <flow name="vm2twitter"> -->
 <!--         <vm:inbound-endpoint path="in"/> -->
 <!--         <twitter:update-status status="#[payload:]"/> -->
 <!--     </flow> -->
 
-<!--     <flow name="http2twittter"> -->
-<!--         <http:inbound-endpoint host="localhost" port="12121" path="marketing" exchange-pattern="request-response"> -->
-<!--             <response> -->
-<!--                 <message-properties-transformer> -->
-<!--                     <add-message-property key="Content-Type" value="text/html"/> -->
-<!--                 </message-properties-transformer> -->
-<!--             </response> -->
-<!--         </http:inbound-endpoint> -->
-<!--         <choice> -->
-<!--             <when evaluator="header" expression="inbound:http.method = GET"> -->
-<!--                 <component class="org.mule.ResourceComponent"/> -->
-<!--             </when> -->
-<!--             <otherwise> -->
-<!--                 <http:body-to-parameter-map-transformer/> -->
-<!--                 <expression-transformer evaluator="map-payload" expression="status"/> -->
-<!--                 <twitter:update-status status="#[payload:]"/> -->
-<!--             </otherwise> -->
-<!--         </choice> -->
-<!--     </flow> -->
+    <flow name="http2twittter">
+        <http:inbound-endpoint host="localhost" port="12121" path="marketing" connector-ref="HttpConnector">
+            <response>
+                <message-properties-transformer>
+                    <add-message-property key="Content-Type" value="text/html"/>
+                </message-properties-transformer>
+            </response>
+        </http:inbound-endpoint>
+        <choice>
+            <when evaluator="header" expression="inbound:http.method = GET">
+                <component class="org.mule.ResourceComponent"/>
+            </when>
+            <otherwise>
+                <http:body-to-parameter-map-transformer/>
+                <expression-transformer evaluator="map-payload" expression="status"/>
+                <twitter:update-status status="#[payload:]"/>
+            </otherwise>
+        </choice>
+    </flow>
 
+    <!--
+        Use a transport specific endpoint here - need to configure the HTTP method which is not
+        that easy in the old style address attribute.
+     -->
     <http:endpoint name="muleBlogs" address="http://feeds.feedburner.com/muleblog" method="GET"
-        exchange-pattern="request-response"/>
+        connector-ref="HttpConnector"/>
 
     <flow name="rss2twitter">
         <quartz:inbound-endpoint jobName="pollMuleBlogs" cronExpression="/10 * * * * ?">
