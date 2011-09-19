@@ -2,6 +2,7 @@
 <mule xmlns="http://www.mulesoft.org/schema/mule/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:context="http://www.springframework.org/schema/context"
       xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
       xmlns:rss="http://www.mulesoft.org/schema/mule/rss"
@@ -9,6 +10,7 @@
       xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
         http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/3.1/mule-twitter.xsd
         http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/3.1/mule-http.xsd
@@ -16,6 +18,9 @@
         http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/3.1/mule-quartz.xsd
         http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/3.1/mule-vm.xsd">
 
+    <context:property-placeholder location="classpath:marketing-machine.properties"/>
+
+    <!-- set the twitter account data as system properties or in wrapper.conf -->
     <twitter:config name="twitter" consumerKey="${twitter.consumer.key}" consumerSecret="${twitter.consumer.secret}"
         format="JSON" oauthToken="${twitter.access.token}" oauthTokenSecret="${twitter.access.secret}"/>
 
@@ -31,7 +36,7 @@
 <!--     </flow> -->
 
     <flow name="http2twittter">
-        <http:inbound-endpoint host="localhost" port="12121" path="marketing" connector-ref="HttpConnector">
+        <http:inbound-endpoint host="localhost" port="${http.server.port}" path="marketing" connector-ref="HttpConnector">
             <response>
                 <message-properties-transformer>
                     <add-message-property key="Content-Type" value="text/html"/>
@@ -58,7 +63,7 @@
         connector-ref="HttpConnector"/>
 
     <flow name="rss2twitter">
-        <quartz:inbound-endpoint jobName="pollMuleBlogs" cronExpression="/10 * * * * ?">
+        <quartz:inbound-endpoint jobName="pollMuleBlogs" cronExpression="${poll.cron.expression}">
             <quartz:endpoint-polling-job>
                 <quartz:job-endpoint ref="muleBlogs"/>
             </quartz:endpoint-polling-job>

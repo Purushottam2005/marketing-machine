@@ -90,6 +90,14 @@
                 <artifactId>maven-mule-plugin</artifactId>
                 <version>1.7</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <inclusions>
+                        <inclusion>
+                            <groupId>org.mule.ibeans</groupId>
+                            <artifactId>twitter-ibean</artifactId>
+                        </inclusion>
+                    </inclusions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
