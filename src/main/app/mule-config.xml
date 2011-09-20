@@ -94,7 +94,9 @@
         <!-- include the title of the blog post along with the URI and a hashtag -->
         <component class="org.mule.TwitterStatusComponent"/>
 
-<!--         <logger level="INFO" message="#[payload:]"/> -->
+        <!-- having the message that goes out to twitter in the log seems to be a good idea -->
+        <logger level="INFO" message="#[payload:]"/>
+
         <twitter:update-status status="#[payload:]"/>
     </flow>
 </mule>
