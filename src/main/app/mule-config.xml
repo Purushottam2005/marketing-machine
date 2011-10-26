@@ -88,7 +88,7 @@
          -->
         <idempotent-message-filter idExpression="#[header:feed.guid]">
             <simple-text-file-store name="idempotent-store" maxEntries="1000"
-                directory="${java.io.tmpdir}/mule-marketing-machine" />
+                directory="${idempotent.store.dir}" />
         </idempotent-message-filter>
 
         <!-- include the title of the blog post along with the URI and a hashtag -->
